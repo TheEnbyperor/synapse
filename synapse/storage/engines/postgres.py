@@ -126,14 +126,17 @@ class PostgresEngine(
         """
 
         collation, ctype = self.get_db_locale(txn)
+        allow_unsafe_locale = self.config.get("allow_unsafe_locale", False)
 
         errors = []
 
         if collation != "C":
-            errors.append("    - 'COLLATE' is set to %r. Should be 'C'" % (collation,))
+            if not allow_unsafe_locale:
+                errors.append("    - 'COLLATE' is set to %r. Should be 'C'" % (collation,))
 
         if ctype != "C":
-            errors.append("    - 'CTYPE' is set to %r. Should be 'C'" % (ctype,))
+            if not allow_unsafe_locale:
+                errors.append("    - 'CTYPE' is set to %r. Should be 'C'" % (ctype,))
 
         if errors:
             raise IncorrectDatabaseSetup(
