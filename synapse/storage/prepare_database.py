@@ -107,10 +107,8 @@ def prepare_database(
         # sqlite does not automatically start transactions for DDL / SELECT statements,
         # so we start one before running anything. This ensures that any upgrades
         # are either applied completely, or not at all.
-        #
-        # (psycopg2 automatically starts a transaction as soon as we run any statements
-        # at all, so this is redundant but harmless there.)
-        cur.execute("BEGIN TRANSACTION")
+        if not isinstance(database_engine, PostgresEngine):
+            cur.execute("BEGIN TRANSACTION")
 
         logger.info("%r: Checking existing schema version", databases)
         version_info = _get_or_create_schema_state(cur, database_engine)
